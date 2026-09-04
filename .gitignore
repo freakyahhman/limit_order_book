@@ -1,0 +1,19 @@
+# CMake build artifacts
+build/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# macOS specific
+.DS_Store
+
+# IDE settings
+.vscode/
+
+# Compiled binaries/objects (catch-all)
+*.o
+*.out
+*.a
+*.dylib
+*.exe
