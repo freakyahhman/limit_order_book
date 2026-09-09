@@ -6,7 +6,7 @@
 namespace lob {
     void OrderBook::addOrder(uint64_t id, Side side, uint64_t price, uint32_t quantity) {
 
-        Order* order = new Order(id, side, price, quantity);
+        Order* order = order_pool_.allocate(id, side, price, quantity);
 
         matchOrder(order);
 
@@ -20,7 +20,7 @@ namespace lob {
             }
         }
         else {
-            delete order;
+            order_pool_.deallocate(order);
         }
     }
 
@@ -36,7 +36,7 @@ namespace lob {
                         sell->quantity_ = 0;
                         level.removeOrder(sell);
                         order_map_[sell->id_] = nullptr;
-                        delete sell;
+                        order_pool_.deallocate(sell);
                         if(order->quantity_ == 0) break;
                     }
                     else {
@@ -64,7 +64,7 @@ namespace lob {
                         
                         level.removeOrder(buy);
                         order_map_[buy->id_] = nullptr;
-                        delete buy;
+                        order_pool_.deallocate(buy);
                         
                         if(order->quantity_ == 0) break;
                     }
@@ -98,6 +98,32 @@ namespace lob {
             }
         }
         order_map_[id] = nullptr;
-        delete order;
+        order_pool_.deallocate(order);
+    }
+
+    void OrderBook::printBook() const {
+        std::cout << "Bids:\n";
+        for(const auto& p : bids_) {
+            std::cout << "Price: " << p.first << '\n';
+            std::cout << "__________\n";
+            const PriceLevel& level = p.second;
+            Order* curr = level.getHead();
+            while(curr != nullptr) {
+                std::cout << "ID: " << curr->id_ << " | Quantity: " << curr->quantity_ << '\n';
+                curr = curr->next;
+            }
+        }
+        std::cout << "____________________\n";
+        std::cout << "Asks:\n";
+        for(const auto& p : asks_) {
+            std::cout << "Price: " << p.first << '\n';
+            std::cout << "__________\n";
+            const PriceLevel& level = p.second;
+            Order* curr = level.getHead();
+            while(curr != nullptr) {
+                std::cout << "ID: " << curr->id_ << " | Quantity: " << curr->quantity_ << '\n';
+                curr = curr->next;
+            }
+        }
     }
 }

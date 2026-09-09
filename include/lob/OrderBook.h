@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "Order.h"
 #include "PriceLevel.h"
+#include "MemoryPool.h"
 
 namespace lob {
 
@@ -31,6 +32,7 @@ private:
     std::unordered_map<uint64_t, Order*> order_map_;
     std::map<uint64_t, PriceLevel, std::greater<uint64_t>> bids_;
     std::map<uint64_t, PriceLevel, std::less<uint64_t>> asks_;
+    MemoryPool order_pool_;
 
     /// Evaluates an aggressive incoming order against resting limit orders on the opposite side to execute trades.
     void matchOrder(Order* order);
