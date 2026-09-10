@@ -10,18 +10,19 @@ The matching engine separates concerns into three distinct layers to maximize CP
 *   **Price Levels (`PriceLevel.h`):** Implemented as intrusive doubly-linked lists. This guarantees `O(1)` order enqueueing, dequeueing, and cancellations without pointer fragmentation.
 *   **Order Book (`OrderBook.h`):** Utilizes Red-Black Trees (`std::map`) for `O(log P)` price-level traversal, mapping price points directly to their corresponding queues.
 
-## ⏱️ Performance Benchmarks
+## ⏱️ The Path to Single-Digit Latency
 
-Micro-benchmarking is powered by **Google Benchmark** to ensure rigorous, nanosecond-precision profiling. 
+Micro-benchmarking is powered by **Google Benchmark** to ensure rigorous, nanosecond-precision profiling. The evolution of the engine's `order_id` lookup architecture demonstrates the critical impact of cache locality and bypassing standard library overhead.
 
-*Currently measured natively on an Apple M4 (10-core) compiled with `-O3` Release optimizations:*
+*Measurements taken natively on an Apple M4 (10-core) compiled with `-O3` Release optimizations:*
 
-| Operation | Latency | Complexity |
-| :--- | :--- | :--- |
-| **Order Insertion (Resting)** | ~32 ns | `O(1)` ID lookup, `O(log P)` Price Level |
-| **Order Matching (Aggressive)** | ~30 ns | `O(log P)` traversal, `O(1)` execution |
+| Architecture | Order Insertion | Order Matching | Engineering Notes |
+| :--- | :--- | :--- | :--- |
+| **1. `std::unordered_map`** | ~32.7 ns | ~30.4 ns | Heavy cache misses from pointer chasing; hidden heap allocations for collision nodes. |
+| **2. Custom `FlatOrderMap`** | ~22.1 ns | ~14.5 ns | Open-addressing with linear probing. Eliminated heap allocations and improved L1 cache pre-fetching. |
+| **3. `VectorOrderMap`** | **~5.0 ns** | **~7.5 ns** | Pre-allocated direct array access. Bypassed hashing entirely for pure $O(1)$ memory addressing. |
 
-*Current throughput supports approximately **30+ million orders per second**.*
+*Current throughput supports over **130+ million orders per second** on a single thread.*
 
 ## 🚀 Build Instructions
 

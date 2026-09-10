@@ -2,10 +2,10 @@
 
 #include <cstdint>
 #include <map>
-#include <unordered_map>
 #include "Order.h"
 #include "PriceLevel.h"
 #include "MemoryPool.h"
+#include "VectorOrderMap.h"
 
 namespace lob {
 
@@ -29,7 +29,7 @@ public:
     void printBook() const;
 
 private:
-    std::unordered_map<uint64_t, Order*> order_map_;
+    VectorOrderMap order_map_;
     std::map<uint64_t, PriceLevel, std::greater<uint64_t>> bids_;
     std::map<uint64_t, PriceLevel, std::less<uint64_t>> asks_;
     MemoryPool order_pool_;
